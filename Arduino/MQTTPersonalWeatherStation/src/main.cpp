@@ -21,21 +21,6 @@ MKRIoTCarrier carrier;
 unsigned long interval = INITIAL_INTERVAL;
 int status = WL_IDLE_STATUS;
 
-void setup()
-{
-  Serial.begin(9600);
-
-  while (!Serial)
-    ;
-
-  delay(1000);
-  Serial.println("Ready");
-
-  connectToWiFi();
-  createMQTTClient();
-  initCarrier();
-}
-
 void initCarrier()
 {
   Serial.println("Attempting to initialize carrier board...");
@@ -53,7 +38,7 @@ void reconnectMQTTClient()
 {
   while (!mqttClient.connected())
   {
-    Serial.print("Attempting MQTT connection: ");
+    Serial.print("Attempting MQTT connection...");
 
     if (mqttClient.connect(CLIENT_NAME.c_str()))
     {
@@ -70,17 +55,10 @@ void reconnectMQTTClient()
   }
 }
 
-void createMQTTClient()
-{
-  mqttClient.setServer(BROKER.c_str(), BROKER_PORT);
-  mqttClient.setCallback(clientCallback);
-  reconnectMQTTClient();
-}
-
 void clientCallback(char *topic, uint8_t *payload, unsigned int length)
 {
   char buff[length + 1];
-  for (int i = 0; i < length; i++)
+  for (unsigned int i = 0; i < length; i++)
   {
     buff[i] = (char)payload[i];
   }
@@ -98,7 +76,14 @@ void clientCallback(char *topic, uint8_t *payload, unsigned int length)
   Serial.print("temperature: ");
   Serial.println(temperature);
 
-  // Insert webhook here once rest of program is done.
+  reconnectMQTTClient();
+}
+
+void createMQTTClient()
+{
+  mqttClient.setServer(BROKER.c_str(), BROKER_PORT);
+  mqttClient.setCallback(clientCallback);
+  reconnectMQTTClient();
 }
 
 void connectToWiFi()
@@ -120,7 +105,7 @@ void connectToWiFi()
   // Try to connect to WiFi
   while (status != WL_CONNECTED)
   {
-    Serial.print("Attempting to connected to WiFi SSID: ");
+    Serial.print("Attempting to connect to WiFi, SSID: ");
     Serial.println(SSID);
 
     status = WiFi.begin(SSID, PASSWORD);
@@ -153,7 +138,23 @@ void publishTemp()
   Serial.println("Telemetry sent!");
 }
 
+void setup()
+{
+  Serial.begin(9600);
+
+  while (!Serial)
+    ;
+
+  delay(1000);
+  Serial.println("Ready");
+
+  connectToWiFi();
+  createMQTTClient();
+  initCarrier();
+}
+
 void loop()
 {
   publishTemp();
+  delay(interval);
 }
