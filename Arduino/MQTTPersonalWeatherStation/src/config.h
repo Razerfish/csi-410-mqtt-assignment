@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const int RETRY_INTERVAL = 5000;
-const long INITIAL_INTERVAL = 1000;
+const unsigned int RETRY_INTERVAL = 5000;
+const unsigned int INITIAL_INTERVAL = 1000;
 
 // WiFi credentials
 const char *SSID = "ChamplainPSK";
