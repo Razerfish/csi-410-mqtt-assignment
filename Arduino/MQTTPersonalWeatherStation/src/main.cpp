@@ -5,32 +5,34 @@ in class
 */
 
 #include <Arduino.h>
-#include <SPI.h>
+#include <PubSubClient.h>
 #include <WiFiNINA.h>
-#include <ArduinoMqttClient.h>
+#include <ArduinoJson.h>
+#include <SPI.h>
 #include <Arduino_MKRIoTCarrier.h>
 
 #include "config.h"
 
-WiFiClient wifiClient;
-MqttClient mqttClient(wifiClient);
+WiFiClient wioClient;
+PubSubClient mqttClient(wioClient);
+
 MKRIoTCarrier carrier;
 
 unsigned long interval = INITIAL_INTERVAL;
 int status = WL_IDLE_STATUS;
 
-float temp = 0.0;
-
 void setup()
 {
   Serial.begin(9600);
 
-  // Wait for Serial to be ready before printing anything but don't block if we're not connected.
+  while (!Serial)
+    ;
+
   delay(1000);
+  Serial.println("Ready");
 
   connectToWiFi();
-  connectToMqttBroker();
-
+  createMQTTClient();
   initCarrier();
 }
 
@@ -38,6 +40,7 @@ void initCarrier()
 {
   Serial.println("Attempting to initialize carrier board...");
 
+  CARRIER_CASE = false;
   if (!carrier.begin())
   {
     Serial.println("Unable to initialize carrier!");
@@ -46,22 +49,56 @@ void initCarrier()
   }
 }
 
-void connectToMqttBroker()
+void reconnectMQTTClient()
 {
-  // This code adapted from here: https://docs.arduino.cc/tutorials/uno-wifi-rev2/uno-wifi-r2-mqtt-device-to-device
-  Serial.print("Attempting to connect to MQTT broker: ");
-  Serial.println(BROKER);
-
-  if (!mqttClient.connect(BROKER, BROKER_PORT))
+  while (!mqttClient.connected())
   {
-    Serial.print("Unable to connect to broker! Error code: ");
-    Serial.println(mqttClient.connectError());
+    Serial.print("Attempting MQTT connection: ");
 
-    while (true)
-      ;
+    if (mqttClient.connect(CLIENT_NAME.c_str()))
+    {
+      Serial.println("connected");
+      mqttClient.subscribe(SUBSCRIBE_TOPIC.c_str());
+    }
+    else
+    {
+      Serial.print("Unable to connect to MQTT broker error code: ");
+      Serial.println(mqttClient.state());
+
+      delay(RETRY_INTERVAL);
+    }
   }
+}
 
-  Serial.println("Connected to MQTT broker!");
+void createMQTTClient()
+{
+  mqttClient.setServer(BROKER.c_str(), BROKER_PORT);
+  mqttClient.setCallback(clientCallback);
+  reconnectMQTTClient();
+}
+
+void clientCallback(char *topic, uint8_t *payload, unsigned int length)
+{
+  char buff[length + 1];
+  for (int i = 0; i < length; i++)
+  {
+    buff[i] = (char)payload[i];
+  }
+  buff[length] = '\0';
+
+  Serial.print("Message received: ");
+  Serial.println(buff);
+
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, buff);
+  JsonObject obj = doc.as<JsonObject>();
+
+  float temperature = obj["temperature"];
+
+  Serial.print("temperature: ");
+  Serial.println(temperature);
+
+  // Insert webhook here once rest of program is done.
 }
 
 void connectToWiFi()
@@ -87,15 +124,36 @@ void connectToWiFi()
     Serial.println(SSID);
 
     status = WiFi.begin(SSID, PASSWORD);
-    delay(WIFI_RETRY_INTERVAL);
+    delay(RETRY_INTERVAL);
   }
 
   Serial.println("Connected!");
 }
 
+void publishTemp()
+{
+  reconnectMQTTClient();
+  mqttClient.loop();
+
+  // delay was here in case you encounter errors
+
+  float temp = carrier.Env.readTemperature();
+
+  DynamicJsonDocument doc(1024);
+  doc["temperature"] = temp;
+
+  string telemetry;
+  serializeJson(doc, telemetry);
+
+  Serial.print("Sending telemetry: ");
+  Serial.println(telemetry.c_str());
+
+  mqttClient.publish(PUBLISH_TOPIC.c_str(), telemetry.c_str());
+
+  Serial.println("Telemetry sent!");
+}
+
 void loop()
 {
-  mqttClient.poll();
-
-  temp = carrier.Env.readTemperature();
+  publishTemp();
 }
