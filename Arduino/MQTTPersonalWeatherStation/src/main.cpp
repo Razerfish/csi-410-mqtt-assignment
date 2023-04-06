@@ -92,8 +92,13 @@ void setup()
   initCarrier(carrier);
 }
 
+static uint32_t last = 0;
+
 void loop()
 {
-  publishTemp();
-  delay(interval);
+  if (millis() - last > interval)
+  {
+    publishTemp();
+    last = millis();
+  }
 }
