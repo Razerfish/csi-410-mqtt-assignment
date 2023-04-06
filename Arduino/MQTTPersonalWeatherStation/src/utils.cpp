@@ -23,8 +23,8 @@ void connectToWiFi(const char* SSID, const char* PASSWORD, WiFiClient& wioClient
     while (status != WL_CONNECTED)
     {
         Serial.print("Unable to connect to WiFi, trying again in ");
-        Serial.print(retry);
-        Serial.println(" milliseconds...");
+        Serial.print(retry / 1000);
+        Serial.println(" seconds.");
         delay(retry);
 
         Serial.print("Attempting to connect to WiFi, SSID: ");
@@ -75,4 +75,30 @@ void reconnectMQTTClient(PubSubClient& client, string clientName, string subscri
             delay(retry);
         }
     }
+}
+
+void initRTC(RTCZero& rtc, unsigned int retry)
+{
+    // The code for this adapted from here: http://man.hubwiz.com/docset/Arduino.docset/Contents/Resources/Documents/www.arduino.cc/en/Tutorial/WiFiRTC.html
+    unsigned long epoch = 0;
+
+    while (epoch == 0)
+    {
+        Serial.println("Fetching current time from server...");
+        epoch = WiFi.getTime();
+
+        if (epoch == 0)
+        {
+            Serial.println("Unable to fetch current time");
+            Serial.print("Trying again in ");
+            Serial.print(retry / 1000);
+            Serial.println(" seconds.");
+            delay(retry);
+        }
+    }
+
+    Serial.println("Current time received!\n");
+
+    rtc.begin();
+    rtc.setEpoch(epoch);
 }

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-const unsigned int RETRY_INTERVAL = 5000;
+const unsigned int RETRY_INTERVAL = 1000;
 const unsigned int INITIAL_INTERVAL = 1000;
 
 // WiFi credentials

@@ -19,6 +19,8 @@ PubSubClient mqttClient(wioClient);
 
 MKRIoTCarrier carrier;
 
+RTCZero rtc;
+
 unsigned long interval = INITIAL_INTERVAL;
 int status = WL_IDLE_STATUS;
 
@@ -59,6 +61,7 @@ void publishTemp()
 
   DynamicJsonDocument doc(1024);
   doc["temperature"] = temp;
+  doc["time"] = rtc.getEpoch();
 
   string telemetry;
   serializeJson(doc, telemetry);
@@ -83,6 +86,7 @@ void setup()
   Serial.println("Ready");
 
   connectToWiFi(SSID, PASSWORD, wioClient, RETRY_INTERVAL, status);
+  initRTC(rtc, RETRY_INTERVAL);
   createMQTTClient(mqttClient, BROKER, BROKER_PORT, clientCallback);  
   reconnectMQTTClient(mqttClient, CLIENT_NAME, SUBSCRIBE_TOPIC, RETRY_INTERVAL);
   initCarrier(carrier);
