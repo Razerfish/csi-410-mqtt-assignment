@@ -18,6 +18,7 @@ void connectToWiFi(const char* SSID, const char* PASSWORD, WiFiClient& wioClient
     // Try to connect to WiFi
     Serial.print("Attempting to connect to WiFi, SSID: ");
     Serial.println(SSID);
+
     status = WiFi.begin(SSID, PASSWORD);
     while (status != WL_CONNECTED)
     {
@@ -31,7 +32,7 @@ void connectToWiFi(const char* SSID, const char* PASSWORD, WiFiClient& wioClient
         status = WiFi.begin(SSID, PASSWORD);
     }
 
-    Serial.println("Connected!");
+    Serial.println("Connected!\n");
 }
 
 void initCarrier(MKRIoTCarrier& carrier)
@@ -45,9 +46,11 @@ void initCarrier(MKRIoTCarrier& carrier)
         while (true)
           ;
     }
+    
+    Serial.println("Success!\n");
 }
 
-void createMQTTClient(PubSubClient& client, string broker, uint16_t brokerPort, void (*callback)(char* topic, uint8_t* payload, unsigned int length))
+void createMQTTClient(PubSubClient& client, const string& broker, const uint16_t brokerPort, void (*callback)(char* topic, uint8_t* payload, unsigned int length))
 {
     client.setServer(broker.c_str(), brokerPort);
     client.setCallback(callback);
@@ -61,7 +64,7 @@ void reconnectMQTTClient(PubSubClient& client, string clientName, string subscri
 
         if (client.connect(clientName.c_str()))
         {
-            Serial.println("Connected");
+            Serial.println("Connected!\n");
             client.subscribe(subscribeTopic.c_str());
         }
         else

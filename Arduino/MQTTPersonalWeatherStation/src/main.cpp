@@ -24,6 +24,8 @@ int status = WL_IDLE_STATUS;
 
 void clientCallback(char *topic, uint8_t *payload, unsigned int length)
 {
+  Serial.println("Client callback");
+
   char buff[length + 1];
   for (unsigned int i = 0; i < length; i++)
   {
@@ -62,11 +64,12 @@ void publishTemp()
   serializeJson(doc, telemetry);
 
   Serial.print("Sending telemetry: ");
-  Serial.println(telemetry.c_str());
+  Serial.print(telemetry.c_str());
+  Serial.print("...");
 
   mqttClient.publish(PUBLISH_TOPIC.c_str(), telemetry.c_str());
 
-  Serial.println("Telemetry sent!");
+  Serial.println("Sent!");
 }
 
 void setup()
@@ -80,7 +83,8 @@ void setup()
   Serial.println("Ready");
 
   connectToWiFi(SSID, PASSWORD, wioClient, RETRY_INTERVAL, status);
-  createMQTTClient(mqttClient, BROKER, BROKER_PORT, clientCallback);
+  createMQTTClient(mqttClient, BROKER, BROKER_PORT, clientCallback);  
+  reconnectMQTTClient(mqttClient, CLIENT_NAME, SUBSCRIBE_TOPIC, RETRY_INTERVAL);
   initCarrier(carrier);
 }
 
