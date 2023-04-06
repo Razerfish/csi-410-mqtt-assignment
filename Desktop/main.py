@@ -1,3 +1,6 @@
+import json
+from datetime import datetime
+
 import paho.mqtt.client as mqtt
 
 # Config variables
@@ -16,7 +19,14 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(SUBSCRIBE_TOPIC)
 
 def on_message(client, userdata, msg):
-    print(msg.topic + " " + str(msg.payload))
+    #print(msg.topic + " " + str(msg.payload))
+
+    data = json.loads(msg.payload.decode("utf-8"))
+
+    with open("temp.txt", "a") as file:
+        output = str(data["temperature"]) + ", " + str(datetime.fromtimestamp(data["time"]))
+        print(output)
+        file.write(output + "\n")
 
 client = mqtt.Client()
 client.on_connect = on_connect
