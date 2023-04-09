@@ -84,11 +84,11 @@ void setup()
   delay(1000);
   Serial.println("Ready");
 
+  initCarrier(carrier);
   connectToWiFi(SSID, PASSWORD, wioClient, RETRY_INTERVAL, status);
   initRTC(rtc, RETRY_INTERVAL);
   createMQTTClient(mqttClient, BROKER, BROKER_PORT, clientCallback);  
   reconnectMQTTClient(mqttClient, CLIENT_NAME, SUBSCRIBE_TOPIC, RETRY_INTERVAL);
-  initCarrier(carrier);
 }
 
 static uint32_t last = 0;
