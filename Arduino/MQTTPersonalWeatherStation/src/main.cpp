@@ -21,6 +21,7 @@ MKRIoTCarrier carrier;
 
 RTCZero rtc;
 
+unsigned long lastWebhook = 0; // The epoch time of when the last webhook was sent.
 unsigned long interval = INITIAL_INTERVAL;
 int status = WL_IDLE_STATUS;
 
@@ -50,14 +51,12 @@ void clientCallback(char *topic, uint8_t *payload, unsigned int length)
   reconnectMQTTClient(mqttClient, CLIENT_NAME, SUBSCRIBE_TOPIC, RETRY_INTERVAL);
 }
 
-void publishTemp()
+void publishTemp(float temp)
 {
   reconnectMQTTClient(mqttClient, CLIENT_NAME, SUBSCRIBE_TOPIC, RETRY_INTERVAL);
   mqttClient.loop();
 
   // delay was here in case you encounter errors
-
-  float temp = carrier.Env.readTemperature();
 
   DynamicJsonDocument doc(1024);
   doc["temperature"] = temp;
@@ -96,9 +95,10 @@ static uint32_t last = 0;
 
 void loop()
 {
+  float temp = readTemp(carrier);
   if (millis() - last > interval)
   {
-    publishTemp();
+    publishTemp(temp);
     last = millis();
   }
 }

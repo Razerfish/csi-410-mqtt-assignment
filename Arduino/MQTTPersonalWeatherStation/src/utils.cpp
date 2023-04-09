@@ -50,6 +50,11 @@ void initCarrier(MKRIoTCarrier& carrier)
     Serial.println("Success!\n");
 }
 
+float readTemp(MKRIoTCarrier& carrier)
+{
+    return carrier.Env.readTemperature();
+}
+
 void createMQTTClient(PubSubClient& client, const string& broker, const uint16_t brokerPort, void (*callback)(char* topic, uint8_t* payload, unsigned int length))
 {
     client.setServer(broker.c_str(), brokerPort);
