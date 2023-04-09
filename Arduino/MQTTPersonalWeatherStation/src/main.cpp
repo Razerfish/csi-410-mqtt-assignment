@@ -95,10 +95,19 @@ static uint32_t last = 0;
 
 void loop()
 {
-  float temp = readTemp(carrier);
   if (millis() - last > interval)
   {
+    float temp = readTemp(carrier);
     publishTemp(temp);
     last = millis();
+
+    if (temp >= UPPER_LIMIT || temp <= LOWER_LIMIT)
+    {
+      if (rtc.getEpoch() >= lastWebhook + REPEAT_TIMEOUT * 60)
+      {
+        callWebhook(wioClient, temp, IFTTT_URL, IFTTT_PORT, WEBHOOK_ENDPOINT);
+        lastWebhook = rtc.getEpoch();
+      }
+    }
   }
 }

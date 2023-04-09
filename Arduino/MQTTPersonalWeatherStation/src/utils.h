@@ -7,6 +7,7 @@
 #include <SPI.h>
 #include <Arduino_MKRIoTCarrier.h>
 #include <RTCZero.h>
+#include <ArduinoJson.h>
 
 using namespace std;
 
@@ -23,3 +24,6 @@ void reconnectMQTTClient(PubSubClient& client, string clientName, string subscri
 
 // Time functions
 void initRTC(RTCZero& rtc, unsigned int retry);
+
+// Webhook functions
+void callWebhook(WiFiClient& client, float temperature, string host, int port, string endpoint);

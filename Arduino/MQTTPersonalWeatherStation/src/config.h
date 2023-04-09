@@ -21,3 +21,13 @@ const string CLIENT_NAME = ID + "temperature_sensor";
 
 const string PUBLISH_TOPIC = ID + "/temperature";
 const string SUBSCRIBE_TOPIC = ID + "/interval";
+
+// Webhook trigger config
+float UPPER_LIMIT = 37.78;
+float LOWER_LIMIT = 0.0;
+int REPEAT_TIMEOUT = 5; // In minutes
+
+// IFTTT Config
+const string IFTTT_URL = "maker.ifttt.com";
+const int IFTTT_PORT = 80;
+const string WEBHOOK_ENDPOINT = "/trigger/temp_outside_bounds/json/with/key/sMih99Vq-ytSzpjDifoNg";

@@ -107,3 +107,27 @@ void initRTC(RTCZero& rtc, unsigned int retry)
     rtc.begin();
     rtc.setEpoch(epoch);
 }
+
+void callWebhook(WiFiClient& client, float temperature, string host, int port, string endpoint)
+{
+    client.connect(host.c_str(), port);
+
+    string payload;
+    DynamicJsonDocument doc(1024);
+    doc["value1"] = temperature;
+
+    serializeJson(doc, payload);
+
+    String request = String(endpoint.c_str());
+    request += " HTTP/1.1\r\n";
+    request += "Host: " + String(host.c_str()) + "\r\n";
+    request += "Content-Type: application/json\r\n";
+    request += "Content-Length: " + String(payload.length()) + "\r\n\r\n";
+    request += String(payload.c_str());
+
+    client.print(request);
+    client.stop();
+
+    Serial.println("Webhook sent:");
+    Serial.println(request);
+}
