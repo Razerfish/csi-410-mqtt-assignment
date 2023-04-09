@@ -92,7 +92,7 @@ void initRTC(RTCZero& rtc, unsigned int retry)
             Serial.println("Unable to fetch current time");
             Serial.print("Trying again in ");
             Serial.print(retry / 1000);
-            Serial.println(" seconds.");
+            Serial.println(" seconds.\n");
             delay(retry);
         }
     }
