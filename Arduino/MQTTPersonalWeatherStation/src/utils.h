@@ -26,4 +26,4 @@ void reconnectMQTTClient(PubSubClient& client, string clientName, string subscri
 void initRTC(RTCZero& rtc, unsigned int retry);
 
 // Webhook functions
-void callWebhook(WiFiClient& client, float temperature, string host, int port, string endpoint);
+void callWebhook(WiFiClient& client, float temperature, String host, String event, String key, int port);

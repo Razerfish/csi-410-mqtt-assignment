@@ -28,6 +28,7 @@ float LOWER_LIMIT = 0.0;
 int REPEAT_TIMEOUT = 5; // In minutes
 
 // IFTTT Config
-const string IFTTT_URL = "maker.ifttt.com";
+const String IFTTT_URL = "maker.ifttt.com";
 const int IFTTT_PORT = 80;
-const string WEBHOOK_ENDPOINT = "/trigger/temp_outside_bounds/json/with/key/sMih99Vq-ytSzpjDifoNg";
+const String IFTTT_EVENT = "temp_outside_bounds";
+const String IFTTT_KEY = "sMih99Vq-ytSzpjDifoNg";

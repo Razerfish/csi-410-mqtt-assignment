@@ -108,26 +108,36 @@ void initRTC(RTCZero& rtc, unsigned int retry)
     rtc.setEpoch(epoch);
 }
 
-void callWebhook(WiFiClient& client, float temperature, string host, int port, string endpoint)
+void callWebhook(WiFiClient& client, float temperature, String host, String event, String key, int port)
 {
     client.connect(host.c_str(), port);
 
-    string payload;
+    String payload;
     DynamicJsonDocument doc(1024);
-    doc["value1"] = temperature;
+    doc["temperature"] = temperature;
 
     serializeJson(doc, payload);
 
-    String request = String(endpoint.c_str());
-    request += " HTTP/1.1\r\n";
-    request += "Host: " + String(host.c_str()) + "\r\n";
-    request += "Content-Type: application/json\r\n";
-    request += "Content-Length: " + String(payload.length()) + "\r\n\r\n";
-    request += String(payload.c_str());
+    String request = "";
+    request.concat("POST /trigger/");
+    request.concat(event.c_str());
+    request.concat("/json/with/key/");
+    request.concat(key.c_str());
+    request.concat(" HTTP/1.1\r\n");
+    request.concat("Host: ");
+    request.concat(host.c_str());
+    request.concat("\r\n");
+    request.concat("Content-Type: application/json\r\n");
+    request.concat("Content-Length: ");
+    request.concat(String(payload.length()).c_str());
+    request.concat("\r\n");
+    request.concat("\r\n");
+    request.concat(payload);
 
-    client.print(request);
+    Serial.println(request.c_str());
+
+    client.print(request.c_str());
+    Serial.println(client.readString());
     client.stop();
 
-    Serial.println("Webhook sent:");
-    Serial.println(request);
 }

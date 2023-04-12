@@ -105,7 +105,7 @@ void loop()
     {
       if (rtc.getEpoch() >= lastWebhook + REPEAT_TIMEOUT * 60)
       {
-        callWebhook(wioClient, temp, IFTTT_URL, IFTTT_PORT, WEBHOOK_ENDPOINT);
+        callWebhook(wioClient, temp, IFTTT_URL, IFTTT_EVENT, IFTTT_KEY, IFTTT_PORT);
         lastWebhook = rtc.getEpoch();
       }
     }
